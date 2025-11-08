@@ -1,44 +1,81 @@
-# 🍔 Vkusnyashki - Fast Food Menu
+🍔 Vkusnyashki - Fast Food Menu
 
-**Vkusnyashki** loyihasi — bu real-time fast food menyu veb-ilovasi.  
-Frontend HTML, Tailwind CSS va JavaScript bilan yaratilgan, backend esa Django + ASGI (Daphne) orqali real-time yangilanishlarni qo‘llab-quvvatlaydi.
+Vkusnyashki is a real-time fast food menu web application.
+The frontend is built with HTML, Tailwind CSS, and JavaScript, while the backend uses Django + ASGI (Daphne) for real-time updates.
 
----
+📌 Features
 
-## 📌 Xususiyatlar
+Fast food menu cards: Burger, pizza, fries, and more.
 
-- ✅ Fast food menu kartalari (burger, pizza, fries, va boshqalar)  
-- ✅ Real-time CRUD operatsiyalari (yaratish, tahrirlash, o‘chirish)  
-- ✅ `is_available` maydoni bo‘yicha menu filtrlanadi — faqat mavjud ovqatlar ko‘rinadi  
-- ✅ Responsive dizayn (desktop, tablet, mobile)  
-- ✅ ImageField qo‘llab-quvvatlanadi  
-- ✅ SSE orqali real-time update  
-- ✅ Admin panel orqali menyuni boshqarish  
+Real-time CRUD operations: Create, edit, delete menu items instantly.
 
----
+Availability filter: Only shows items marked as available (is_available).
 
-## ⚙️ Texnologiyalar
+Responsive design: Works seamlessly on desktop, tablet, and mobile devices.
 
-- **Backend:** Django 5.2.x  
-- **ASGI server:** Daphne  
-- **Frontend:** HTML, Tailwind CSS, JavaScript  
-- **Database:** SQLite (default, boshqa DB ham ishlaydi)  
-- **Images:** Pillow  
-- **Package manager / venv:** UV
+Image support: Upload and display food images with Django ImageField.
 
----
+Real-time updates: Powered by Server-Sent Events (SSE).
 
-## 🛠️ O‘rnatish UV bilan
+Admin panel: Full menu management via Django admin.
 
-1. Loyihani klon qilish:
+⚙️ Technologies
 
-```bash
-git clone <repository-url>
+Backend: Django 5.2.x
+
+ASGI Server: Daphne
+
+Frontend: HTML, Tailwind CSS, JavaScript
+
+Database: SQLite (default, compatible with other databases)
+
+Images: Pillow
+
+Package manager / virtual environment: UV
+
+🛠️ Installation
+
+Clone the repository:
+
+git clone https://github.com/muhammadmirzovm/vkusnyashki
 cd vkusnyashki
 
-uv venv create .venv
+
+Set up a virtual environment with UV:
+
+uv venv .venv
 uv venv activate .venv
 
+
+Install dependencies:
+
 uv install -r requirements.txt
+
+
+Apply database migrations:
+
 uv run python manage.py makemigrations
 uv run python manage.py migrate
+
+
+Run the development server:
+
+uv run python manage.py runserver
+
+📂 Project Structure (Optional)
+
+backend/ — Django backend
+
+frontend/ — HTML, CSS, JavaScript files
+
+media/ — Uploaded images
+
+requirements.txt — Python dependencies
+
+Notes
+
+Ensure Python 3.11+ is installed.
+
+Supports real-time updates using SSE.
+
+Admin panel accessible at /admin for managing menu items.

@@ -1,4 +1,3 @@
-# menu/views.py
 import asyncio
 import json
 from django.shortcuts import render
@@ -6,7 +5,6 @@ from django.http import StreamingHttpResponse
 from django.views.decorators.http import require_GET
 from .models import Food
 
-# ====== SSE Subscribers ======
 SUBSCRIBERS = set()
 
 async def broadcast_event(data):
@@ -17,13 +15,12 @@ async def broadcast_event(data):
         await queue.put(data)
 
 
-# ====== Frontend Menu Page ======
 def menu_page(request):
     """
     Render the menu page with only available food items
     """
     foods = []
-    for f in Food.objects.filter(is_available=True):  # <-- filter qo'shildi
+    for f in Food.objects.filter(is_available=True): 
         foods.append({
             "id": f.id,
             "name": f.name,
@@ -34,7 +31,6 @@ def menu_page(request):
         })
     return render(request, "menu/index.html", {"foods": foods})
 
-# ====== SSE Endpoint ======
 @require_GET
 async def sse_menu(request):
     """
@@ -56,5 +52,5 @@ async def sse_menu(request):
         content_type="text/event-stream"
     )
     response["Cache-Control"] = "no-cache"
-    response["X-Accel-Buffering"] = "no"  # for nginx, optional
+    response["X-Accel-Buffering"] = "no" 
     return response

@@ -20,9 +20,9 @@
         const menuContainer = document.getElementById("menu");
 
         function updateFoodItem(item) {
-            // Agar food mavjud bo'lmasa (is_available false) — hech narsa qilmaymiz
+
             if (!item.is_available) {
-                // agar karta sahifada bo'lsa, olib tashlaymiz (safety)
+
                 removeFoodItem(item.id);
                 return;
             }
@@ -55,14 +55,14 @@
             if (card) card.remove();
         }
 
-        // Initial render — faqat available bo'lganlarni chizamiz
+
         const initialFoods = JSON.parse(document.getElementById("foods-data").textContent);
         initialFoods.forEach(item => {
             if (item.is_available) updateFoodItem(item);
-            else removeFoodItem(item.id); // agar oldindan bo'lsa, ishonch uchun olib tashlash
+            else removeFoodItem(item.id); 
         });
 
-        // SSE real-time updates
+
         const source = new EventSource("/events/menu/");
         source.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -71,18 +71,15 @@
                 const payload = data.payload;
 
                 if (data.action === "deleted") {
-                    // O'chirilgan bo'lsa olib tashlaymiz
+
                     removeFoodItem(payload.id);
                     return;
                 }
 
-                // Agar yangilanish kelib, mavjudlik false bo'lsa — olib tashla
                 if (payload.is_available === false) {
                     removeFoodItem(payload.id);
                     return;
                 }
-
-                // Aks holda qo'sh yoki yangila (faqat availablelar shu yerda chiziladi)
                 updateFoodItem(payload);
             }
         };

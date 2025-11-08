@@ -1,4 +1,3 @@
-# menu/signals.py
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Food
@@ -25,7 +24,6 @@ def food_saved(sender, instance, created, **kwargs):
     try:
         asyncio.get_event_loop().create_task(broadcast_event(event))
     except RuntimeError:
-        # fallback if no event loop
         from asgiref.sync import async_to_sync
         async_to_sync(broadcast_event)(event)
 
