@@ -1,0 +1,212 @@
+[
+  {
+    "model": "menu.food",
+    "pk": 1,
+    "fields": {
+      "name": "Classic Cheeseburger",
+      "photo": "foods/cheeseburger.jpg",
+      "description": "Juicy beef patty with melted cheese, lettuce, tomato and house sauce.",
+      "price": "5.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 2,
+    "fields": {
+      "name": "Crispy French Fries",
+      "photo": "foods/fries.jpg",
+      "description": "Hand-cut potatoes fried until golden and crispy.",
+      "price": "2.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 3,
+    "fields": {
+      "name": "Iced Lemonade",
+      "photo": "foods/icedlemonade_Ly1qcXS.jpg",
+      "description": "Freshly squeezed lemonade — tart, sweet and refreshing.",
+      "price": "1.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 5,
+    "fields": {
+      "name": "Spicy Chicken Wings",
+      "photo": "foods/wings.jpg",
+      "description": "Hot wings with spicy buffalo sauce.",
+      "price": "7.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 6,
+    "fields": {
+      "name": "Grilled Chicken Sandwich",
+      "photo": "foods/grilled_chicken.jpg",
+      "description": "Grilled chicken breast with lettuce and tomato on a toasted bun.",
+      "price": "6.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 7,
+    "fields": {
+      "name": "Double Cheeseburger",
+      "photo": "foods/double_cheeseburger.jpg",
+      "description": "Two beef patties with double cheese, pickles, and onions.",
+      "price": "8.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 8,
+    "fields": {
+      "name": "Fish Sandwich",
+      "photo": "foods/fish_sandwich.jpg",
+      "description": "Crispy fried fish fillet with tartar sauce and lettuce.",
+      "price": "6.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 9,
+    "fields": {
+      "name": "Onion Rings",
+      "photo": "foods/onion_rings.jpg",
+      "description": "Crunchy onion rings served with dipping sauce.",
+      "price": "3.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 10,
+    "fields": {
+      "name": "Chocolate Milkshake",
+      "photo": "foods/chocolate_milkshake.jpg",
+      "description": "Creamy chocolate milkshake topped with whipped cream.",
+      "price": "4.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 11,
+    "fields": {
+      "name": "Vanilla Milkshake",
+      "photo": "foods/vanilla_milkshake.jpg",
+      "description": "Classic vanilla milkshake topped with whipped cream.",
+      "price": "4.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 12,
+    "fields": {
+      "name": "Strawberry Milkshake",
+      "photo": "foods/strawberry_milkshake.jpg",
+      "description": "Fresh strawberry milkshake with whipped cream.",
+      "price": "4.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 13,
+    "fields": {
+      "name": "Caesar Salad",
+      "photo": "foods/caesar_salad.jpg",
+      "description": "Crisp romaine lettuce with parmesan, croutons, and Caesar dressing.",
+      "price": "5.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 14,
+    "fields": {
+      "name": "Greek Salad",
+      "photo": "foods/greek_salad.jpg",
+      "description": "Fresh vegetables with feta cheese, olives, and olive oil dressing.",
+      "price": "5.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 15,
+    "fields": {
+      "name": "Soft Drink",
+      "photo": "foods/soft_drink.jpg",
+      "description": "Refreshing carbonated beverage, choice of cola or lemon-lime.",
+      "price": "1.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 16,
+    "fields": {
+      "name": "Iced Tea",
+      "photo": "foods/iced_tea.jpg",
+      "description": "Chilled black tea with lemon and ice cubes.",
+      "price": "2.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 17,
+    "fields": {
+      "name": "Cheese Pizza Slice",
+      "photo": "foods/cheese_pizza.jpg",
+      "description": "Classic cheese pizza slice with tomato sauce and mozzarella.",
+      "price": "3.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 18,
+    "fields": {
+      "name": "Pepperoni Pizza Slice",
+      "photo": "foods/pepperoni_pizza.jpg",
+      "description": "Spicy pepperoni with tomato sauce and mozzarella cheese.",
+      "price": "4.50",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 19,
+    "fields": {
+      "name": "Chocolate Brownie",
+      "photo": "foods/brownie.jpg",
+      "description": "Rich chocolate brownie with a fudgy center.",
+      "price": "2.99",
+      "is_available": true
+    }
+  },
+  {
+    "model": "menu.food",
+    "pk": 20,
+    "fields": {
+      "name": "Ice Cream Sundae",
+      "photo": "foods/sundae.jpg",
+      "description": "Vanilla ice cream topped with chocolate sauce and nuts.",
+      "price": "3.50",
+      "is_available": true
+    }
+  }
+  
+]

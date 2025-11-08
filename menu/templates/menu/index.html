@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🍔 Fast Food Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+    <header class="mb-6 text-center">
+        <h1 class="text-4xl font-bold text-yellow-600">🍟 Vkusnyashki</h1>
+        <p class="text-gray-700 mt-1">Delicious fast food menu updated in real-time!</p>
+    </header>
+
+    <div id="menu" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+    {{ foods|json_script:"foods-data" }}
+
+    <script>
+        const menuContainer = document.getElementById("menu");
+
+        function updateFoodItem(item) {
+            // Agar food mavjud bo'lmasa (is_available false) — hech narsa qilmaymiz
+            if (!item.is_available) {
+                // agar karta sahifada bo'lsa, olib tashlaymiz (safety)
+                removeFoodItem(item.id);
+                return;
+            }
+
+            let card = document.getElementById(`food-${item.id}`);
+            if (!card) {
+                card = document.createElement("div");
+                card.id = `food-${item.id}`;
+                card.className = "bg-white rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col h-full";
+                menuContainer.appendChild(card);
+            }
+
+            card.innerHTML = `
+                <img src="${item.photo || ''}" alt="${item.name}" class="w-full h-40 object-cover rounded-xl mb-3">
+                <h2 class="text-lg font-bold text-gray-800 mb-1">${item.name}</h2>
+                <p class="text-gray-600 text-sm flex-grow line-clamp-3 overflow-hidden">
+                    ${item.description ? (item.description.length > 120 ? item.description.slice(0,120) + "..." : item.description) : ''}
+                </p>
+                <div class="mt-3 flex justify-between items-center">
+                    <span class="text-xl font-semibold text-yellow-600">$${item.price}</span>
+                    ${item.is_available 
+                        ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-xs font-medium">Available</span>` 
+                        : `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-lg text-xs font-medium">Sold Out</span>`}
+                </div>
+            `;
+        }
+
+        function removeFoodItem(id) {
+            const card = document.getElementById(`food-${id}`);
+            if (card) card.remove();
+        }
+
+        // Initial render — faqat available bo'lganlarni chizamiz
+        const initialFoods = JSON.parse(document.getElementById("foods-data").textContent);
+        initialFoods.forEach(item => {
+            if (item.is_available) updateFoodItem(item);
+            else removeFoodItem(item.id); // agar oldindan bo'lsa, ishonch uchun olib tashlash
+        });
+
+        // SSE real-time updates
+        const source = new EventSource("/events/menu/");
+        source.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "food_update") {
+                const payload = data.payload;
+
+                if (data.action === "deleted") {
+                    // O'chirilgan bo'lsa olib tashlaymiz
+                    removeFoodItem(payload.id);
+                    return;
+                }
+
+                // Agar yangilanish kelib, mavjudlik false bo'lsa — olib tashla
+                if (payload.is_available === false) {
+                    removeFoodItem(payload.id);
+                    return;
+                }
+
+                // Aks holda qo'sh yoki yangila (faqat availablelar shu yerda chiziladi)
+                updateFoodItem(payload);
+            }
+        };
+
+        source.onerror = (err) => {
+            console.error("SSE error:", err);
+        };
+    </script>
+
+</body>
+</html>
