@@ -1,0 +1,46 @@
+:root{
+  --card-min-w:220px;
+  --card-max-w:260px;
+  --card-img-h:140px;
+  --gap:1rem;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:#f7fafc;color:#0f172a}
+.page{height:100vh;display:flex;flex-direction:column}
+.header{padding:20px 24px 12px;text-align:center;background:linear-gradient(180deg,#ffffffcc, #ffffff00)}
+.header-inner{max-width:1100px;margin:0 auto}
+.brand{font-size:2rem;color:#f59e0b;margin:0;font-weight:700;letter-spacing:-0.5px}
+.tagline{margin:6px 0 0;color:#475569;font-size:0.98rem}
+.carousel{flex:1;display:flex;flex-direction:column;overflow:hidden;align-items:stretch;justify-content:center;gap:8px;padding:0 20px 20px}
+.rail{flex:1;overflow:hidden;margin:0;display:block;border-radius:12px}
+.track{display:flex;gap:var(--gap);align-items:center;height:100%;padding:8px 6px}
+.track-inner{display:flex;gap:var(--gap);align-items:center;will-change:transform}
+.track-inner.reverse{}
+@keyframes scroll-by-shift{0%{transform:translateX(0)}100%{transform:translateX(calc(-1 * var(--shift)))}}
+.rail:hover .track-inner{animation-play-state:paused}
+.ff-card{min-width:var(--card-min-w);max-width:var(--card-max-w);flex:0 0 auto;background:#ffffff;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06);display:flex;flex-direction:column;padding:12px;height:calc(100% - 6px);transition:transform .18s ease,box-shadow .18s ease}
+.ff-card:focus-within,.ff-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(2,6,23,0.10)}
+.media img{width:100%;height:var(--card-img-h);object-fit:cover;border-radius:8px;display:block;margin-bottom:10px}
+.content{display:flex;flex-direction:column;flex:1;min-height:0}
+.ff-card h3{font-size:1rem;margin:0 0 6px 0;color:#0f172a;font-weight:700}
+.desc{font-size:0.88rem;margin:0;color:#475569;line-height:1.2;overflow:hidden}
+.card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}
+.price{font-weight:800;color:#b45309;font-size:1rem;line-height:1}
+.muted{color:#9ca3af;font-weight:700}
+.badge{font-size:0.72rem;padding:6px 8px;border-radius:8px;font-weight:700}
+.badge-available{background:#ecfdf5;color:#065f46}
+.empty{color:#64748b;padding:12px}
+@media (max-width:900px){
+  :root{--card-min-w:200px;--card-max-w:220px;--card-img-h:120px}
+  .brand{font-size:1.7rem}
+  .carousel{padding:0 16px 16px}
+}
+@media (max-width:640px){
+  :root{--card-min-w:260px;--card-max-w:320px;--card-img-h:160px}
+  .page{height:auto}
+  .carousel{gap:12px;padding:12px}
+  .rail{height:auto;overflow-x:auto}
+  .track{height:auto;padding:6px 6px}
+  .track-inner{display:inline-flex;animation:none !important;gap:12px}
+  .ff-card{height:auto}
+}

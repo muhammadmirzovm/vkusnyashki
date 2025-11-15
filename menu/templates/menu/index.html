@@ -1,93 +1,201 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>🍔 Fast Food Menu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8">
+  <title>Delicacies — Fast Food Menu</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'images/hamburger.png' %}">
 </head>
-<body class="bg-gray-100 p-6">
-
-    <header class="mb-6 text-center">
-        <h1 class="text-4xl font-bold text-yellow-600">🍟 Vkusnyashki</h1>
-        <p class="text-gray-700 mt-1">Delicious fast food menu updated in real-time!</p>
+<body>
+  <div class="page">
+    <header class="header" role="banner">
+      <div class="header-inner">
+        <h1 class="brand">🍟 Delicacies</h1>
+        <p class="tagline">Delicious fast food menu updated in real-time</p>
+      </div>
     </header>
 
-    <div id="menu" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    <main class="carousel" id="carousel" role="main" aria-label="Fast food carousel">
+      <div class="rail" id="rail-1">
+        <div class="track">
+          <div class="track-inner" id="track-1" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="rail" id="rail-2">
+        <div class="track">
+          <div class="track-inner reverse" id="track-2" aria-live="polite"></div>
+        </div>
+      </div>
+    </main>
+  </div>
 
-    {{ foods|json_script:"foods-data" }}
+  {{ foods|json_script:"foods-data" }}
 
-    <script>
-        const menuContainer = document.getElementById("menu");
+  <script>
+  (function(){
+    const PIXELS_PER_SECOND = 140;
+    const MIN_DURATION = 8;
+    const DUP_SUFFIX = 'dup';
+    const dataEl = document.getElementById('foods-data');
+    const initialFoods = JSON.parse(dataEl ? dataEl.textContent : '[]') || [];
+    const track1 = document.getElementById('track-1');
+    const track2 = document.getElementById('track-2');
+    const rail1 = document.getElementById('rail-1');
+    const rail2 = document.getElementById('rail-2');
+    const foodsMap = new Map();
+    initialFoods.forEach(f => { if (f && f.is_available) foodsMap.set(String(f.id), f); });
 
-        function updateFoodItem(item) {
+    function escapeHtml(s){
+      if (s === null || s === undefined) return '';
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
 
-            if (!item.is_available) {
+    function makeCardHTML(item, suffix=''){
+      const photo = escapeHtml(item.photo || '{% static "images/hamburger.png" %}');
+      const name = escapeHtml(item.name || 'No name');
+      const descRaw = item.description || '';
+      const desc = escapeHtml(descRaw.length > 90 ? descRaw.slice(0,90) + '...' : descRaw);
+      const priceRaw = (item.price !== undefined && item.price !== null) ? String(item.price) : null;
+      const priceHtml = priceRaw ? ('$' + escapeHtml(priceRaw)) : '<span class="muted">—</span>';
+      const idSuffix = suffix ? `-${suffix}` : '';
+      return `
+        <article class="ff-card" id="food-${escapeHtml(item.id)}-card${idSuffix}" data-food-id="${escapeHtml(item.id)}" role="article" aria-label="${name}">
+          <div class="media">
+            <img src="${photo}" alt="${name}">
+          </div>
+          <div class="content">
+            <h3>${name}</h3>
+            <p class="desc">${desc}</p>
+            <div class="card-meta">
+              <div class="price">${priceHtml}</div>
+              <div class="badge badge-available">Available</div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
 
-                removeFoodItem(item.id);
-                return;
-            }
-
-            let card = document.getElementById(`food-${item.id}`);
-            if (!card) {
-                card = document.createElement("div");
-                card.id = `food-${item.id}`;
-                card.className = "bg-white rounded-2xl shadow-md hover:shadow-xl transition p-4 flex flex-col h-full";
-                menuContainer.appendChild(card);
-            }
-
-            card.innerHTML = `
-                <img src="${item.photo || ''}" alt="${item.name}" class="w-full h-40 object-cover rounded-xl mb-3">
-                <h2 class="text-lg font-bold text-gray-800 mb-1">${item.name}</h2>
-                <p class="text-gray-600 text-sm flex-grow line-clamp-3 overflow-hidden">
-                    ${item.description ? (item.description.length > 120 ? item.description.slice(0,120) + "..." : item.description) : ''}
-                </p>
-                <div class="mt-3 flex justify-between items-center">
-                    <span class="text-xl font-semibold text-yellow-600">$${item.price}</span>
-                    ${item.is_available 
-                        ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-xs font-medium">Available</span>` 
-                        : `<span class="bg-red-100 text-red-700 px-2 py-1 rounded-lg text-xs font-medium">Sold Out</span>`}
-                </div>
-            `;
+    function markDuplicates(trackElem){
+      const children = Array.from(trackElem.children);
+      const half = Math.floor(children.length / 2);
+      children.forEach((ch, i) => {
+        if (i >= half){
+          ch.setAttribute('data-duplicate', 'true');
+          ch.setAttribute('aria-hidden', 'true');
+        } else {
+          ch.removeAttribute('data-duplicate');
+          ch.removeAttribute('aria-hidden');
         }
+      });
+    }
 
-        function removeFoodItem(id) {
-            const card = document.getElementById(`food-${id}`);
-            if (card) card.remove();
+    function finalizeTrackAnimation(trackElem){
+      const totalWidth = trackElem.scrollWidth || 0;
+      const firstHalf = Math.floor(totalWidth / 2);
+      const containerWidth = trackElem.closest('.track').offsetWidth || 0;
+      if (!firstHalf || firstHalf <= containerWidth){
+        trackElem.style.animation = 'none';
+        trackElem.style.removeProperty('--shift');
+        trackElem.style.removeProperty('animation-name');
+        trackElem.style.removeProperty('animation-duration');
+        trackElem.style.removeProperty('animation-timing-function');
+        trackElem.style.removeProperty('animation-iteration-count');
+        trackElem.style.removeProperty('animation-direction');
+        return;
+      }
+      const duration = Math.max(MIN_DURATION, Math.round(firstHalf / PIXELS_PER_SECOND));
+      trackElem.style.setProperty('--shift', firstHalf + 'px');
+      trackElem.style.animationName = 'scroll-by-shift';
+      trackElem.style.animationTimingFunction = 'linear';
+      trackElem.style.animationIterationCount = 'infinite';
+      trackElem.style.animationDuration = duration + 's';
+      trackElem.style.animationDirection = trackElem.classList.contains('reverse') ? 'reverse' : 'normal';
+    }
+
+    function buildTrackHTML(list){
+      if (!list.length) return '';
+      const first = list.map(i => makeCardHTML(i,'')).join('');
+      const second = list.map(i => makeCardHTML(i,DUP_SUFFIX)).join('');
+      return first + second;
+    }
+
+    function rebuildCarousel(){
+      const items = Array.from(foodsMap.values());
+      if (!items.length){
+        track1.innerHTML = '<div class="empty">No items available</div>';
+        track2.innerHTML = '<div class="empty">No items available</div>';
+        rail1.style.display = '';
+        rail2.style.display = '';
+        return;
+      }
+      const row1 = [], row2 = [];
+      items.forEach((it, idx)=> idx % 2 === 0 ? row1.push(it) : row2.push(it));
+      rail1.style.display = row1.length ? '' : 'none';
+      rail2.style.display = row2.length ? '' : 'none';
+      track1.innerHTML = buildTrackHTML(row1);
+      track2.innerHTML = buildTrackHTML(row2.slice().reverse());
+      markDuplicates(track1);
+      markDuplicates(track2);
+      requestAnimationFrame(()=> {
+        setTimeout(()=> {
+          finalizeTrackAnimation(track1);
+          finalizeTrackAnimation(track2);
+        }, 60);
+      });
+    }
+
+    function updateFoodItem(item){
+      if (!item) return;
+      if (item.is_available === false){ removeFoodItem(item.id); return; }
+      foodsMap.set(String(item.id), item);
+      rebuildCarousel();
+    }
+
+    function removeFoodItem(id){
+      if (!id) return;
+      foodsMap.delete(String(id));
+      rebuildCarousel();
+    }
+
+    rebuildCarousel();
+
+    try {
+      const source = new EventSource('/events/menu/');
+      source.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data && data.type === 'food_update'){
+            const p = data.payload;
+            if (data.action === 'deleted'){ removeFoodItem(p.id); return; }
+            if (p.is_available === false){ removeFoodItem(p.id); return; }
+            updateFoodItem(p);
+          }
+        } catch (err){
+          console.error('Bad SSE payload', err);
         }
+      };
+      source.onerror = (err)=> { console.error('SSE error', err); };
+    } catch (err){
+      console.warn('EventSource init failed', err);
+    }
 
+    document.getElementById('carousel').addEventListener('click', (ev)=>{
+      const el = ev.target.closest('[data-food-id]');
+      if (!el) return;
+      const id = el.getAttribute('data-food-id');
+      console.log('food clicked', id);
+    });
 
-        const initialFoods = JSON.parse(document.getElementById("foods-data").textContent);
-        initialFoods.forEach(item => {
-            if (item.is_available) updateFoodItem(item);
-            else removeFoodItem(item.id); 
-        });
+    let _resizeTimeout = null;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(_resizeTimeout);
+      _resizeTimeout = setTimeout(rebuildCarousel, 250);
+    });
 
-
-        const source = new EventSource("/events/menu/");
-        source.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            if (data.type === "food_update") {
-                const payload = data.payload;
-
-                if (data.action === "deleted") {
-
-                    removeFoodItem(payload.id);
-                    return;
-                }
-
-                if (payload.is_available === false) {
-                    removeFoodItem(payload.id);
-                    return;
-                }
-                updateFoodItem(payload);
-            }
-        };
-
-        source.onerror = (err) => {
-            console.error("SSE error:", err);
-        };
-    </script>
-
+    window._vkusnyashki = { rebuildCarousel, updateFoodItem, removeFoodItem, foodsMap };
+  })();
+  </script>
 </body>
 </html>
