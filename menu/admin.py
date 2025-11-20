@@ -1,6 +1,8 @@
-from django.contrib import admin
-from .models import Food
 from django import forms
+from django.contrib import admin
+
+from .models import Food
+
 
 class FoodAdminForm(forms.ModelForm):
     class Meta:
@@ -15,6 +17,7 @@ class FoodAdminForm(forms.ModelForm):
                 }
             ),
         }
+
 
 @admin.register(Food)
 class FoodAdmin(admin.ModelAdmin):
