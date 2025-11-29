@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <title>{{ monitor.name }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div id="sse-metadata"
+       data-sse-url="{% url 'menu:sse_monitor' monitor_pk=monitor.id %}"
+       data-monitor-id="{{ monitor.id }}"
+       style="display:none"></div>
+
+  <main class="menu-screen">
+    {% for cat in categories %}
+    <section class="menu-row" id="category-block-{{ cat.id }}" data-category-id="{{ cat.id }}">
+      <div class="left-panel" id="left-cat-{{ cat.id }}">
+        <header class="category-title">{{ cat.name }}</header>
+
+        <ul class="items-list" id="category-{{ cat.id }}-list">
+          {% for f in cat.foods %}
+          <li class="item{% if not f.is_available %} unavailable{% endif %}" id="food-{{ f.id }}"
+              data-food-id="{{ f.id }}"
+              data-category-id="{{ cat.id }}"
+              data-photo-url="{{ f.photo }}"
+              data-price="{{ f.price }}">
+            <span class="item-name">{{ f.name }}</span>
+            <span class="item-price">{{ f.price|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <aside class="right-panel" id="right-cat-{{ cat.id }}">
+        <div class="preview-wrap">
+
+          <img class="preview-img" src="{{ cat.foods.0.photo_url }}"alt="" />
+          <div class="preview-price-tag" aria-hidden="true">$0.00</div>
+          <div class="preview-title"></div>
+        </div>
+      </aside>
+    </section>
+    {% endfor %}
+  </main>
+
+  <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

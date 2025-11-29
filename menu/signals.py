@@ -7,11 +7,16 @@ from .models import Food
 from .views import broadcast_event
 
 
+def _get_monitor_id_from_food(instance):
+    try:
+        return instance.category.monitor_id
+    except Exception:
+        return None
+
+
 @receiver(post_save, sender=Food)
 def food_saved(sender, instance, created, **kwargs):
-    """
-    Triggered on create or update
-    """
+    monitor_id = _get_monitor_id_from_food(instance)
     event = {
         "type": "food_update",
         "action": "created" if created else "updated",
@@ -21,15 +26,17 @@ def food_saved(sender, instance, created, **kwargs):
             "price": float(instance.price),
             "is_available": instance.is_available,
             "description": instance.description,
-            "photo": instance.photo.url if instance.photo else "",
+            "photo_url": instance.photo.url if instance.photo else "",
+            "category_id": instance.category_id,
+            "monitor_id": monitor_id,
         },
     }
     try:
-        asyncio.get_event_loop().create_task(broadcast_event(event))
+        asyncio.get_event_loop().create_task(broadcast_event(event, monitor_id=monitor_id))
     except RuntimeError:
         from asgiref.sync import async_to_sync
+        async_to_sync(broadcast_event)(event, monitor_id=monitor_id)
 
-        async_to_sync(broadcast_event)(event)
 
 
 @receiver(post_delete, sender=Food)
@@ -37,10 +44,12 @@ def food_deleted(sender, instance, **kwargs):
     """
     Triggered on delete
     """
-    event = {"type": "food_update", "action": "deleted", "payload": {"id": instance.id}}
+    monitor_id = _get_monitor_id_from_food(instance)
+    event = {"type": "food_update", "action": "deleted", "payload": {"id": instance.id, "category_id": instance.category_id}}
     try:
-        asyncio.get_event_loop().create_task(broadcast_event(event))
+        asyncio.get_event_loop().create_task(broadcast_event(event, monitor_id=monitor_id))
     except RuntimeError:
         from asgiref.sync import async_to_sync
 
-        async_to_sync(broadcast_event)(event)
+        async_to_sync(broadcast_event)(event, monitor_id=monitor_id)
+

@@ -1,27 +1,27 @@
-from django import forms
 from django.contrib import admin
+from .models import Monitor, Category, Food
 
-from .models import Food
+
+class FoodInline(admin.TabularInline):
+    model = Food
+    extra = 0
+    fields = ("name", "price", "is_available")
 
 
-class FoodAdminForm(forms.ModelForm):
-    class Meta:
-        model = Food
-        fields = "__all__"
-        widgets = {
-            "description": forms.Textarea(
-                attrs={
-                    "placeholder": "Describe your dish briefly (max 120 characters)",
-                    "rows": 3,
-                    "maxlength": 120,
-                }
-            ),
-        }
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "monitor", "order")
+    list_filter = ("monitor",)
+    inlines = [FoodInline]
+
+
+@admin.register(Monitor)
+class MonitorAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
 
 
 @admin.register(Food)
 class FoodAdmin(admin.ModelAdmin):
-    form = FoodAdminForm
-    list_display = ("name", "price", "is_available")
+    list_display = ("name", "category", "price", "is_available")
+    list_filter = ("category__monitor", "is_available")
     search_fields = ("name",)
-    list_filter = ("is_available",)

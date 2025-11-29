@@ -1,57 +1,82 @@
 import asyncio
 import json
 
-from django.http import StreamingHttpResponse
-from django.shortcuts import render
+from django.http import StreamingHttpResponse, Http404
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET
 
-from .models import Food
+from .models import Monitor, Category, Food
 
-SUBSCRIBERS = set()
+SUBSCRIBERS = {}
 
 
-async def broadcast_event(data):
+async def broadcast_event(data, monitor_id=None):
     """
-    Send an event to all connected SSE clients
+    Push event to queues subscribed to this monitor_id.
+    If monitor_id is None -> broadcast to all monitors.
     """
-    for queue in list(SUBSCRIBERS):
-        await queue.put(data)
+    if monitor_id is None:
+        # broadcast to all
+        for queues in list(SUBSCRIBERS.values()):
+            for q in list(queues):
+                await q.put(data)
+    else:
+        queues = SUBSCRIBERS.get(monitor_id, set())
+        for q in list(queues):
+            await q.put(data)
 
 
-def menu_page(request):
-    """
-    Render the menu page with only available food items
-    """
-    foods = []
-    for f in Food.objects.filter(is_available=True):
-        foods.append(
-            {
+def monitor_page(request, pk):
+    monitor = get_object_or_404(Monitor, pk=pk)
+    categories = monitor.categories.prefetch_related("foods").all()
+
+    data = []
+    for c in categories:
+        foods = []
+        for f in c.foods.order_by("id"):
+            if not f.is_available:
+                continue
+            photo_url = request.build_absolute_uri(f.photo.url) if f.photo else ""
+            foods.append({
                 "id": f.id,
                 "name": f.name,
                 "price": float(f.price),
-                "is_available": f.is_available,
                 "description": f.description,
-                "photo": f.photo.url if f.photo else "",
-            }
-        )
-    return render(request, "menu/index.html", {"foods": foods})
+                "photo_url": photo_url,
+                "is_available": f.is_available,
+                "category_id": c.id,
+            })
+        data.append({"id": c.id, "name": c.name, "foods": foods})
+    return render(request, "menu/monitor.html", {"monitor": monitor, "categories": data})
 
 
 @require_GET
-async def sse_menu(request):
+async def sse_monitor(request, monitor_pk):
     """
-    Server-Sent Events endpoint to push real-time updates
+    SSE endpoint for a specific monitor (EventSource connects here).
     """
+
+    try:
+        monitor = await asyncio.to_thread(lambda: Monitor.objects.filter(pk=monitor_pk).exists())
+    except Exception:
+        raise Http404
+
     queue = asyncio.Queue()
-    SUBSCRIBERS.add(queue)
+    SUBSCRIBERS.setdefault(monitor_pk, set()).add(queue)
 
     async def event_stream():
         try:
             while True:
                 data = await queue.get()
+
                 yield f"data: {json.dumps(data)}\n\n".encode("utf-8")
         finally:
-            SUBSCRIBERS.remove(queue)
+
+            subscribers = SUBSCRIBERS.get(monitor_pk)
+            if subscribers and queue in subscribers:
+                subscribers.remove(queue)
+                if not subscribers:
+                    SUBSCRIBERS.pop(monitor_pk, None)
 
     response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"
