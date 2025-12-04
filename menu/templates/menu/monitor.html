@@ -29,7 +29,7 @@
               data-photo-url="{{ f.photo }}"
               data-price="{{ f.price }}">
             <span class="item-name">{{ f.name }}</span>
-            <span class="item-price">{{ f.price|floatformat:2 }}</span>
+            <span class="item-price">${{ f.price|floatformat:2 }}</span>
           </li>
           {% endfor %}
         </ul>
